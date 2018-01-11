@@ -1,0 +1,22 @@
+#!/usr/bin/env node
+'use strict';
+
+require('dotenv').config();
+var SequelizeAuto = require('sequelize-auto');
+
+var auto = new SequelizeAuto(process.env.DB_DATABASE, process.env.DB_USER, process.env.DB_PASSWORD,
+    {
+        host: process.env.DB_HOST,
+        dialect: 'postgres',
+       // directory: false, // prevents the program from writing to disk
+        port: process.env.DB_PORT
+    });
+
+auto.run(function (err) {
+    if (err) {
+        throw err;
+    }
+
+    console.log(auto.tables); // table list
+    console.log(auto.foreignKeys); // foreign key list
+});

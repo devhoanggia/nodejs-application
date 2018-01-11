@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+case $1 in
+	start)
+		echo "Start docker...\n"
+		docker-compose -f docker-compose.yml up -d
+		break
+		;;
+	restart)
+        echo "Restart docker...\n"
+        docker-compose restart posgres-db
+        break
+        ;;
+	ssh)
+		echo "Ssh docker ...\n"
+		docker exec -it posgres-db bash
+		break
+		;;
+	*)
+		echo "Sorry, I don't understand"
+		;;
+esac

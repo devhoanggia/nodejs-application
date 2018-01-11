@@ -1,0 +1,59 @@
+#!/usr/bin/env node
+'use strict';
+//http://www.feedforall.com/sample.xml
+
+/**
+ * Module dependencies.
+ */
+
+var chalk = require('chalk');
+var program = require('commander');
+var FeedParser = require('feedparser');
+var request = require('request'); // for fetching the feed
+var feedParser = new FeedParser();
+var models =require('../models');
+
+program
+    .arguments('url')
+    .action(function(url) {
+        console.log('Url is: ', url);
+        urlItem = url;
+    })
+    .parse(process.argv);
+
+
+if (typeof urlItem === 'undefined') {
+    console.error(chalk.red('No url command given!'));
+    process.exit(1);
+}
+
+request(urlItem, function (error, res, body) {
+    if (error) {
+        console.log(chalk.red('request error:'), error);
+        return;
+    }
+
+    if (res.statusCode !== 200) {
+        console.log(chalk.red('Server is error') + ' code:' + res.statusCode + ' res:' + res + ' body:' + body);
+        return;
+    }
+}).pipe(feedParser);
+
+feedParser.on('error', function (error) {
+    console.error(error);
+}).on('readable', function () {
+    var stream = this;
+    var meta = this.meta;
+    var item;
+
+    models.resource.findOrCreate({where: {address: urlItem}, defaults: {
+        created_at: "Rss",
+        updated_at: "Rss"
+    }}).spread(function(user, created){
+        console.log(created);
+    });
+
+    while (item = stream.read()) {
+        console.log(item);
+    }
+});
